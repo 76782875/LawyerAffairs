@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lecshop.total.viprecord.mapper.VipModifyRecordMapper">
+    <resultMap id="VipModifyRecord" type="com.lecshop.total.viprecord.bean.VipModifyRecord">
+        <result column="id" property="id"/>
+        <result column="manager_id" property="managerId"/>
+        <result column="company_id" property="companyId"/>
+        <result column="old_vip" property="oldVip"/>
+        <result column="new_vip" property="newVip"/>
+        <result column="remark" property="remark"/>
+        <result column="start_time" property="startTime"/>
+        <result column="end_time" property="endTime"/>
+        <result column="type" property="type"/>
+        <result column="create_time" property="createTime"/>
+    </resultMap>
+    <insert id="addVipModifyRecord" parameterType="com.lecshop.total.viprecord.bean.VipModifyRecord">
+        INSERT INTO ls_vip_modify_record (manager_id,company_id,old_vip,new_vip,remark,start_time,end_time,`type`,create_time)
+        VALUES (#{managerId},#{companyId},#{oldVip},#{newVip},#{remark},#{startTime},#{endTime},#{type},now())
+    </insert>
+    <select id="queryVipModifyRecordByTime" parameterType="java.util.Map" resultMap="VipModifyRecord">
+        SELECT * FROM ls_vip_modify_record
+        WHERE ((start_time &lt;= #{time} AND end_time &gt;= #{time}) OR start_time &gt;= #{time}) AND company_id = #{companyId}
+        ORDER BY end_time DESC LIMIT 1
+    </select>
+    <select id="queryVipModifyRecordByTimeForLogin" parameterType="java.util.Map" resultMap="VipModifyRecord">
+        SELECT * FROM ls_vip_modify_record
+        WHERE start_time &lt;= #{time} AND end_time &gt;= #{time} AND company_id = #{companyId}  ORDER BY create_time DESC LIMIT 1
+    </select>
+    <resultMap id="VipModifyRecords" type="com.lecshop.total.viprecord.bean.VipModifyRecord">
+        <result column="id" property="id"/>
+        <result column="manager_id" property="managerId"/>
+        <result column="company_id" property="companyId"/>
+        <result column="old_vip" property="oldVip"/>
+        <result column="new_vip" property="newVip"/>
+        <result column="remark" property="remark"/>
+        <result column="start_time" property="startTime"/>
+        <result column="end_time" property="endTime"/>
+        <result column="type" property="type"/>
+        <result column="create_time" property="createTime"/>
+        <result column="companyName" property="companyName"/>
+        <result column="managerName" property="managerName"/>
+    </resultMap>
+    <select id="queryVipModifyRecord" resultMap="VipModifyRecords" parameterType="java.util.Map">
+        SELECT vmr.*,lci.name AS companyName,lm.username AS managerName FROM ls_vip_modify_record AS vmr
+        JOIN (ls_company_info AS lci,ls_manager as lm) ON vmr.company_id=lci.id AND vmr.manager_id=lm.id WHERE `type`='0'
+        <if test="companyName !='' and companyName !=null">
+            AND lci.name LIKE CONCAT(CONCAT('%', #{companyName}), '%')
+        </if>
+        ORDER BY create_time DESC
+        limit #{startRowNum},#{pageSize}
+    </select>
+    <select id="queryVipModifyRecordCount" parameterType="java.util.Map" resultType="java.lang.Integer">
+        SELECT COUNT(1) FROM ls_vip_modify_record AS vmr
+        JOIN (ls_company_info AS lci,ls_manager as lm) ON vmr.company_id=lci.id AND vmr.manager_id=lm.id WHERE `type`='0'
+        <if test="companyName !='' and companyName !=null">
+            AND lci.name LIKE CONCAT(CONCAT('%', #{companyName}), '%')
+        </if>
+    </select>
+</mapper>

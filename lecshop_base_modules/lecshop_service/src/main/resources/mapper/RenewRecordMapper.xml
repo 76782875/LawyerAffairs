@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lecshop.total.renewrecord.mapper.RenewRecordMapper">
+    <resultMap id="renewRecordResult" type="com.lecshop.total.renewrecord.bean.RenewRecord">
+        <result column="id" property="id"/>
+        <result column="user_id" property="userId"/>
+        <result column="company_id" property="companyId"/>
+        <result column="status" property="status"/>
+        <result column="renew_money" property="renewMoney"/>
+        <result column="create_time" property="createTime"/>
+        <result column="order_no" property="orderNo"/>
+        <result column="type" property="type"/>
+        <result column="order_name" property="orderName"/>
+        <result column="company_name" property="companyName"/>
+        <result column="renew_name" property="renewName"/>
+    </resultMap>
+    <select id="queryRenewRecordList" parameterType="java.util.Map" resultMap="renewRecordResult">
+        SELECT r.id,r.user_id,r.company_id,r.renew_money,r.create_time,r.`status`,r.order_no,r.type,r.order_name,c.`name` AS company_name,u.`name` AS renew_name
+        FROM ls_renew_record r JOIN ls_company_info c ON r.company_id = c.id JOIN ls_user u ON r.user_id = u.id WHERE 1 = 1
+        <if test='name != null and !"".equals(name.trim())'>
+            AND c.`name` LIKE CONCAT(CONCAT('%', #{name}),'%')
+        </if>
+        <if test='orderNo != null and !"".equals(orderNo.trim())'>
+            AND r.order_no = #{orderNo}
+        </if>
+        ORDER BY r.create_time DESC
+        limit #{startRowNum},#{pageSize}
+    </select>
+    <select id="queryRenewRecordCount" parameterType="java.util.Map" resultType="java.lang.Integer">
+        SELECT COUNT(1)
+        FROM ls_renew_record r JOIN ls_company_info c ON r.company_id = c.id JOIN ls_user u ON r.user_id = u.id WHERE 1 = 1
+        <if test='name != null and !"".equals(name.trim())'>
+            AND c.`name` LIKE CONCAT(CONCAT('%', #{name}),'%')
+        </if>
+        <if test='orderNo != null and !"".equals(orderNo.trim())'>
+            AND r.order_no = #{orderNo}
+        </if>
+    </select>
+    <select id="querySumMoneyByCompanyId" parameterType="java.util.Map" resultType="java.math.BigDecimal">
+        SELECT SUM(renew_money) FROM ls_renew_record WHERE company_id = #{id} AND `status` = '1'
+        <if test='(startTime != null and startTime != "") and (endTime != null and endTime != "")'>
+            AND create_time BETWEEN #{startTime} AND #{endTime}
+        </if>
+    </select>
+
+    <resultMap id="order" type="com.lecshop.total.renewrecord.bean.RenewRecord">
+        <result column="id" property="id"/>
+        <result column="user_id" property="userId"/>
+        <result column="company_id" property="companyId"/>
+        <result column="status" property="status"/>
+        <result column="renew_money" property="renewMoney"/>
+        <result column="create_time" property="createTime"/>
+        <result column="order_no" property="orderNo"/>
+        <result column="type" property="type"/>
+        <result column="order_name" property="orderName"/>
+    </resultMap>
+    <select id="queryRenewRecordByOrderNo" resultMap="order" parameterType="java.lang.String">
+        SELECT * FROM ls_renew_record WHERE order_no = #{orderNo}
+    </select>
+    <update id="editRenewRecordByOrderNo" parameterType="java.lang.String">
+        UPDATE ls_renew_record SET status = '1' WHERE order_no = #{orderNo}
+    </update>
+    <insert id="addRenewRecord" parameterType="com.lecshop.total.renewrecord.bean.RenewRecord">
+        INSERT INTO ls_renew_record (user_id,company_id,status,renew_money,create_time,order_no,`type`,order_name)
+        VALUES (#{userId},#{companyId},#{status},#{renewMoney},#{createTime},#{orderNo},#{type},#{orderName})
+    </insert>
+    <select id="queryYourselfRenewRecord" parameterType="java.util.Map" resultMap="order">
+        SELECT id,user_id,company_id,status,renew_money,create_time,order_no,order_name
+        FROM ls_renew_record
+        WHERE company_id = #{companyId}
+        <if test="userId != 0">
+            AND user_id = #{userId}
+        </if>
+        ORDER BY create_time DESC
+        limit #{startRowNum},#{pageSize}
+    </select>
+    <select id="queryYourselfRenewRecordCount" parameterType="java.util.Map" resultType="java.lang.Integer">
+        SELECT COUNT(1) FROM ls_renew_record WHERE company_id = #{companyId}
+        <if test="userId != 0">
+            AND user_id = #{userId}
+        </if>
+    </select>
+
+    <select id="queryConsumption" parameterType="java.util.Map" resultType="java.math.BigDecimal">
+        SELECT SUM(renew_money) FROM ls_renew_record
+        WHERE `status` = '1' AND company_id = #{companyId}
+        <if test="userId != 0">
+            AND user_id = #{userId}
+        </if>
+        <if test="todayOrTotal == 0">
+            AND to_days(create_time) = to_days(now())
+        </if>
+    </select>
+</mapper>

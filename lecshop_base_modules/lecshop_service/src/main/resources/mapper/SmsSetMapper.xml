@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lecshop.admin.sms.mapper.SmsMapper">
+    <resultMap id="BaseResult" type="com.lecshop.admin.sms.bean.Sms">
+        <result column="id" property="id"/>
+        <result column="key" property="key"/>
+        <result column="secret" property="secret"/>
+        <result column="url" property="url"/>
+        <result column="sign" property="sign"/>
+        <result column="template_id" property="templateId"/>
+    </resultMap>
+    <select id="querySmsSet" resultMap="BaseResult">
+        SELECT id,`key`,secret,url,sign,template_id FROM ls_sms_setting
+    </select>
+    <update id="editSmsSet" parameterType="com.lecshop.admin.sms.bean.Sms">
+        UPDATE ls_sms_setting SET `key`=#{key},secret=#{secret},url=#{url},sign=#{sign},
+        template_id=#{templateId} WHERE id=#{id}
+    </update>
+</mapper>

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lecshop.total.withdrawset.mapper.WithdrawSetMapper">
+    <resultMap id="withdrawSet" type="com.lecshop.total.withdrawset.bean.WithdrawSet">
+        <result column="id" property="id"/>
+        <result column="lawyer_id" property="lawyerId"/>
+        <result column="account" property="account"/>
+        <result column="name" property="name"/>
+    </resultMap>
+
+    <select id="queryByLawyerId" parameterType="java.lang.Long" resultMap="withdrawSet">
+        SELECT * FROM ls_lawyer_withdraw_set where lawyer_id = #{lawyerId}
+    </select>
+
+    <delete id="deleteByLawyerId" parameterType="java.lang.Long">
+        delete from ls_lawyer_withdraw_set where lawyer_id = #{lawyerId}
+    </delete>
+
+    <insert id="addWithdrawSet" parameterType="com.lecshop.total.withdrawset.bean.WithdrawSet">
+           INSERT INTO ls_lawyer_withdraw_set (lawyer_id,account,name)
+        VALUES (#{lawyerId},#{account},#{name})
+    </insert>
+</mapper>

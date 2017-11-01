@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lecshop.total.withdraw.mapper.WithdrawMapper">
+    <resultMap id="withdraw" type="com.lecshop.total.withdraw.bean.Withdraw">
+        <result column="id" property="id"/>
+        <result column="lawyer_id" property="lawyerId"/>
+        <result column="money" property="money"/>
+        <result column="status" property="status"/>
+        <result column="trade_no" property="tradeNo"/>
+        <result column="trans_id" property="transId"/>
+        <result column="create_time" property="createTime"/>
+        <result column="name" property="lawyer.name"/>
+        <result column="mobile" property="lawyer.mobile"/>
+    </resultMap>
+
+    <insert id="addWithdraw" parameterType="com.lecshop.total.withdraw.bean.Withdraw">
+           INSERT INTO ls_withdraw (lawyer_id,money,status,trade_no,trans_id,create_time)
+        VALUES (#{lawyerId},#{money},#{status},#{tradeNo},#{transId},now())
+    </insert>
+
+    <select id="queryWithdrawsCount" parameterType="java.util.Map" resultType="java.lang.Integer">
+        select count(1) from ls_withdraw join ls_lawyer on ls_withdraw.lawyer_id = ls_lawyer.id where ls_lawyer.del_flag
+        = '0'
+        <if test="lawyerId != '' and lawyerId != 0">
+            AND ls_withdraw.lawyer_id=#{lawyerId}
+        </if>
+        <if test="name != '' and name != null">
+            AND ls_lawyer.name=#{name}
+        </if>
+        <if test="status != '' and status != null">
+            AND ls_withdraw.status=#{status}
+        </if>
+        <if test="tradeNo != '' and tradeNo != null">
+            AND ls_withdraw.trade_no=#{tradeNo}
+        </if>
+        <if test="mobile != '' and mobile != null">
+            AND ls_lawyer.mobile=#{mobile}
+        </if>
+    </select>
+
+    <select id="queryWithdraws" parameterType="java.util.Map" resultMap="withdraw">
+        select ls_withdraw.*,ls_lawyer.name, ls_lawyer.mobile from ls_withdraw join ls_lawyer on ls_withdraw.lawyer_id =
+        ls_lawyer.id where ls_lawyer.del_flag = '0'
+        <if test="lawyerId != '' and lawyerId != 0">
+            AND ls_withdraw.lawyer_id=#{lawyerId}
+        </if>
+        <if test="name != '' and name != null">
+            AND ls_lawyer.name=#{name}
+        </if>
+        <if test="status != '' and status != null">
+            AND ls_withdraw.status=#{status}
+        </if>
+        <if test="tradeNo != '' and tradeNo != null">
+            AND ls_withdraw.trade_no=#{tradeNo}
+        </if>
+        <if test="mobile != '' and mobile != null">
+            AND ls_lawyer.mobile=#{mobile}
+        </if>
+        order by create_time desc
+        limit #{startRowNum},#{pageSize}
+    </select>
+
+    <update id="changeStatus" parameterType="java.util.Map">
+        update ls_withdraw set status = #{status} where id = #{id}
+    </update>
+
+    <select id="queryById" parameterType="java.lang.Long" resultMap="withdraw">
+        select * from ls_withdraw where id = #{id}
+    </select>
+</mapper>

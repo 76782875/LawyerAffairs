@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lecshop.total.wxsetting.mapper.WxSettingMapper">
+    <resultMap id="wxSetting" type="com.lecshop.total.wxsetting.bean.WxSetting">
+        <result column="id" property="id"/>
+        <result column="app_id" property="appId"/>
+        <result column="app_secret" property="appSecret"/>
+        <result column="callback_url" property="callBackUrl"/>
+    </resultMap>
+
+    <select id="queryWxSetting" resultMap="wxSetting">
+        SELECT * FROM ls_wx_setting limit 1
+    </select>
+
+    <update id="updateWxSetting" parameterType="com.lecshop.total.wxsetting.bean.WxSetting">
+        UPDATE ls_wx_setting SET app_id = #{appId}, app_secret = #{appSecret}, callback_url = #{callBackUrl} WHERE id = #{id}
+    </update>
+</mapper>

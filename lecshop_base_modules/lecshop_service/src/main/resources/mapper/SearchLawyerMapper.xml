@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lecshop.abutment.lawyer.mapper.SearchLawyerMapper">
+    <select id="queryAvgScoreByLawyerId" resultType="java.lang.Integer" parameterType="java.lang.Long">
+       SELECT IFNULL(ROUND(AVG(score)),0) FROM
+        (
+        SELECT score FROM ls_disputes WHERE lawyer_id=#{lawyerId}
+        UNION ALL
+        SELECT score FROM ls_draft_doc WHERE lawyer_id=#{lawyerId}
+        UNION ALL
+        SELECT score FROM ls_important_matter WHERE lawyer_id=#{lawyerId}
+        UNION ALL
+        SELECT score FROM ls_lawyer_letter WHERE lawyer_id=#{lawyerId}
+        UNION ALL
+        SELECT score FROM ls_meeting WHERE lawyer_id=#{lawyerId}
+        UNION ALL
+        SELECT score FROM ls_modify_doc WHERE lawyer_id=#{lawyerId}
+        UNION ALL
+        SELECT score FROM ls_tel_consultation WHERE lawyer_id=#{lawyerId}
+        ) AS ls_score
+    </select>
+</mapper>

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lecshop.total.affairlist.mapper.LawyerLetterDetailMapper">
+
+    <resultMap id="lawyerLetterDetailResult" type="com.lecshop.total.affairlist.bean.LawyerLetterDetail">
+        <result column="id" property="id"/>
+        <result column="letter_id" property="letterId"/>
+        <result column="type" property="type"/>
+        <result column="desc" property="desc"/>
+        <result column="file_url" property="fileUrl"/>
+        <result column="create_time" property="createTime"/>
+    </resultMap>
+
+    <insert id="addLawyerLetterDetail" parameterType="com.lecshop.total.affairlist.bean.LawyerLetterDetail">
+        INSERT INTO ls_lawyer_letter_detail (letter_id, `type`, `desc`, file_url, create_time) VALUES
+        (#{letterId},#{type}, #{desc},#{fileUrl},NOW())
+    </insert>
+
+    <select id="queryLawyerLetterDetails" parameterType="java.lang.Long" resultMap="lawyerLetterDetailResult">
+        select * from ls_lawyer_letter_detail where letter_id = #{letterId}
+    </select>
+</mapper>

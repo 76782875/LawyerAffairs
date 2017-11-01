@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lecshop.total.affairlist.mapper.DraftDocDetailMapper">
+
+    <resultMap id="draftDocDetailResult" type="com.lecshop.total.affairlist.bean.DraftDocDetail">
+        <id column="id" property="id"/>
+        <result column="doc_id" property="docId"/>
+        <result column="type" property="type"/>
+        <result column="desc" property="desc"/>
+        <result column="doc_url" property="docUrl"/>
+        <result column="create_time" property="createTime"/>
+    </resultMap>
+
+    <insert id="addDraftDocDetail" parameterType="com.lecshop.total.affairlist.bean.DraftDocDetail">
+        INSERT INTO ls_draft_doc_detail (doc_id, `type`, `desc`,doc_url, create_time) VALUES (#{docId}, #{type}, #{desc}, #{docUrl}, NOW())
+    </insert>
+
+    <select id="queryDraftDocDetailByDocId" parameterType="java.lang.Long" resultMap="draftDocDetailResult">
+        SELECT id,doc_id,`type`,`desc`,doc_url,create_time FROM ls_draft_doc_detail WHERE doc_id = #{docId}
+    </select>
+</mapper>

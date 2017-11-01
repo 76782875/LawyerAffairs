@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lecshop.total.affairlist.mapper.ModifyDocDetailMapper">
+    <resultMap id="BaseResult" type="com.lecshop.total.affairlist.bean.ModifyDocDetail">
+        <id column="id" property="id"/>
+        <result column="doc_id" property="docId"/>
+        <result column="type" property="type"/>
+        <result column="desc" property="desc"/>
+        <result column="doc_url" property="docUrl"/>
+        <result column="create_time" property="createTime"/>
+    </resultMap>
+    <select id="queryModifyDocDetailById" parameterType="java.lang.Long" resultMap="BaseResult">
+        SELECT * FROM ls_modify_doc_detail WHERE doc_id=#{docId}
+    </select>
+    <insert id="addModifyDocDetail" parameterType="com.lecshop.total.affairlist.bean.ModifyDocDetail">
+        INSERT INTO ls_modify_doc_detail (doc_id, `type`, `desc`, doc_url, create_time) VALUES (#{docId}, #{type}, #{desc}, #{docUrl}, NOW())
+    </insert>
+</mapper>

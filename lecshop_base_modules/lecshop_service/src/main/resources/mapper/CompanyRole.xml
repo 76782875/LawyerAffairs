@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lecshop.company.companyauth.mapper.CompanyRoleMapper">
+    <resultMap id="BaseResult" type="com.lecshop.company.companyauth.bean.CompanyRole">
+        <id column="id" property="id"/>
+        <result column="name" property="name"/>
+        <result column="company_id" property="companyId"/>
+        <result column="create_time" property="createTime"/>
+    </resultMap>
+
+    <select id="queryCompanyRoleCount" parameterType="java.util.Map" resultType="java.lang.Integer">
+        SELECT count(1) FROM ls_comany_role WHERE company_id=#{companyId}
+        <if test="name != null">
+            AND `name` LIKE CONCAT(CONCAT('%', #{name}),'%')
+        </if>
+    </select>
+
+    <select id="queryAllCompanyRole" parameterType="java.util.Map" resultMap="BaseResult">
+        SELECT id,`name`,company_id,create_time FROM ls_comany_role
+        where company_id=#{companyId}
+        <if test="name != null">
+            AND `name` like CONCAT(CONCAT('%', #{name}),'%')
+        </if>
+        <if test="isPaging ==1">
+            limit #{startRowNum},#{pageSize}
+        </if>
+    </select>
+
+    <select id="roleNameCheck" parameterType="java.lang.String" resultMap="BaseResult">
+        SELECT * FROM ls_comany_role WHERE `name`=#{name}
+    </select>
+
+    <insert id="addCompanyRole" parameterType="com.lecshop.company.companyauth.bean.CompanyRole" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO ls_comany_role (`name`,company_id,create_time) VALUES (#{name},#{companyId},now())
+    </insert>
+
+    <insert id="addCompanyRoleAndAuth" parameterType="java.util.List">
+        INSERT INTO ls_company_role_authority (role_id,authority_id,create_time) VALUES
+        <foreach collection="list" index="index" item="roleAndAuth" separator=",">
+            (
+            #{roleAndAuth.roleId},#{roleAndAuth.authId},now()
+            )
+        </foreach>
+    </insert>
+
+    <select id="queryAuthIdByRoleId" parameterType="java.lang.Long" resultType="java.lang.Long">
+        SELECT authority_id FROM ls_company_role_authority WHERE role_id=#{roleId}
+    </select>
+
+    <delete id="deleteAllAuthByRoleId" parameterType="java.util.List">
+        DELETE FROM ls_company_role_authority WHERE role_id IN
+        <foreach collection="array" index="index" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
+
+    <update id="editRoleName" parameterType="com.lecshop.company.companyauth.bean.CompanyRole">
+    UPDATE ls_comany_role SET `name`=#{name} WHERE id=#{id} AND company_id=#{companyId}
+    </update>
+
+    <delete id="deleteCompanyRole" parameterType="java.util.Map">
+        DELETE FROM ls_comany_role WHERE company_id=#{companyId} AND id IN
+        <foreach collection="idArrays" index="index" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
+
+    <select id="queryCompanyRoleByCompanyId" resultMap="BaseResult" parameterType="java.lang.Long">
+        SELECT id,`name`,company_id,create_time FROM ls_comany_role WHERE company_id=#{companyId}
+    </select>
+
+    <insert id="addUserRole" parameterType="java.lang.Long">
+        INSERT INTO ls_user_role (user_id,role_id,create_time) VALUES (#{0},#{1},now())
+    </insert>
+    <delete id="deleteUserRole" parameterType="java.util.List">
+        DELETE FROM ls_user_role WHERE user_id IN
+        <foreach collection="array" index="index" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
+    <update id="editUserRole" parameterType="java.lang.Long">
+        UPDATE ls_user_role SET role_id=#{0} WHERE user_id=#{1}
+    </update>
+</mapper>

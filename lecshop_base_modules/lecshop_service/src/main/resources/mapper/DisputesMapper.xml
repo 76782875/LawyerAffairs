@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lecshop.total.affairlist.mapper.DisputesMapper">
+    <resultMap id="BaseResult" type="com.lecshop.total.affairlist.bean.Disputes">
+        <result column="id" property="id"/>
+        <result column="company_id" property="companyId"/>
+        <result column="user_id" property="userId"/>
+        <result column="lawyer_id" property="lawyerId"/>
+        <result column="status" property="status"/>
+        <result column="price" property="price"/>
+        <result column="desc" property="desc"/>
+        <result column="consult_type" property="consultType"/>
+        <result column="create_time" property="createTime"/>
+        <result column="score" property="score"/>
+        <result column="lawyerName" property="lawyer.name"/>
+        <result column="companyName" property="companyInfo.name"/>
+        <result column="userName" property="user.name"/>
+    </resultMap>
+    <select id="queryDisputesCount" parameterType="java.util.Map" resultType="java.lang.Integer">
+        SELECT COUNT(1) FROM
+        (SELECT d.*,ci.`name` AS companyName,u.`name` AS userName
+        FROM ls_disputes AS d LEFT JOIN (ls_company_info AS ci,ls_user AS u)
+        ON (d.company_id=ci.id AND d.user_id=u.id)
+        ) AS mcu LEFT JOIN ls_lawyer AS l ON mcu.lawyer_id=l.id WHERE 1=1
+        <if test="type !='' and type !=null">
+            AND mcu.`type`=#{type}
+        </if>
+        <if test="meetType !='' and meetType !=null">
+            AND mcu.meet_type=#{meetType}
+        </if>
+        <if test="lawyerName !='' and lawyerName !=null">
+            AND l.`name` LIKE CONCAT(CONCAT('%', #{lawyerName}), '%')
+        </if>
+        <if test="companyName !='' and companyName !=null">
+            AND mcu.companyName LIKE CONCAT(CONCAT('%', #{companyName}), '%')
+        </if>
+        <if test="companyId !='' and companyId != 0 ">
+            AND company_id=#{companyId}
+        </if>
+        <if test="userId !='' and userId != 0 ">
+            AND user_id=#{userId}
+        </if>
+        <if test="lawyerId !='' and lawyerId != 0 ">
+            AND lawyer_id=#{lawyerId}
+        </if>
+    </select>
+    <select id="queryDisputes" parameterType="java.util.Map" resultMap="BaseResult">
+        SELECT mcu.*,l.`name` AS lawyerName FROM
+        (
+        SELECT d.*,ci.`name` AS companyName,u.`name` AS userName
+        FROM ls_disputes AS d LEFT JOIN (ls_company_info AS ci,ls_user AS u)
+        ON (d.company_id=ci.id AND d.user_id=u.id)
+        ) AS mcu LEFT JOIN ls_lawyer AS l ON mcu.lawyer_id=l.id WHERE 1=1
+        <if test="type !='' and type !=null">
+            AND mcu.`type`=#{type}
+        </if>
+        <if test="meetType !='' and meetType !=null">
+            AND mcu.meet_type=#{meetType}
+        </if>
+        <if test="lawyerName !='' and lawyerName !=null">
+            AND l.`name` LIKE CONCAT(CONCAT('%', #{lawyerName}), '%')
+        </if>
+        <if test="companyName !='' and companyName !=null">
+            AND mcu.companyName LIKE CONCAT(CONCAT('%', #{companyName}), '%')
+        </if>
+        <if test="companyId !='' and companyId != 0 ">
+            AND company_id=#{companyId}
+        </if>
+        <if test="userId !='' and userId != 0 ">
+            AND user_id=#{userId}
+        </if>
+        <if test="lawyerId !='' and lawyerId != 0 ">
+            AND lawyer_id=#{lawyerId}
+        </if>
+        ORDER BY create_time DESC
+        limit #{startRowNum},#{pageSize}
+    </select>
+    <insert id="addDisputes" parameterType="com.lecshop.total.affairlist.bean.Disputes" keyProperty="id" useGeneratedKeys="true">
+        INSERT INTO ls_disputes (company_id,user_id,lawyer_id,status,`desc`,consult_type,create_time)
+        VALUES (#{companyId},#{userId},#{lawyerId},#{status},#{desc},#{consultType},now())
+    </insert>
+    <select id="queryToDoDisputes" parameterType="java.util.Map" resultMap="BaseResult">
+        SELECT d.*,l.`name` AS lawyerName FROM ls_disputes AS d JOIN ls_lawyer AS l ON d.lawyer_id=l.id
+        WHERE d.status!='0' AND d.status!= '1' AND d.status!= '5' AND d.company_id=#{companyId}
+        <if test="userId">
+            AND d.user_id=#{userId}
+        </if>
+    </select>
+    <update id="changeDisputesStatus" parameterType="java.util.Map">
+        UPDATE ls_disputes SET status = #{status} WHERE id = #{id}
+    </update>
+    <update id="gradeForDisputes" parameterType="java.util.Map">
+        UPDATE ls_disputes SET score = #{score} WHERE id = #{id}
+    </update>
+    <update id="confirmDispute" parameterType="java.util.Map">
+        UPDATE ls_disputes SET status ='2' , price = #{money} WHERE id = #{id}
+    </update>
+    <select id="queryDisputesById" parameterType="java.lang.Long" resultMap="BaseResult">
+        SELECT * FROM ls_disputes WHERE id=#{id}
+    </select>
+
+    <select id="queryDisputesOrderCount" parameterType="java.util.Map" resultType="java.lang.Integer">
+        SELECT COUNT(1) FROM ls_disputes WHERE lawyer_id = #{id}
+        <if test='(startTime != null and startTime != "") and (endTime != null and endTime != "")'>
+            AND create_time BETWEEN #{startTime} AND #{endTime}
+        </if>
+    </select>
+    <select id="queryDisputesOrderCountOfCompany" parameterType="java.util.Map" resultType="java.lang.Integer">
+        SELECT COUNT(1) FROM ls_disputes WHERE company_id = #{id}
+        <if test='(startTime != null and startTime != "") and (endTime != null and endTime != "")'>
+            AND create_time BETWEEN #{startTime} AND #{endTime}
+        </if>
+    </select>
+</mapper>

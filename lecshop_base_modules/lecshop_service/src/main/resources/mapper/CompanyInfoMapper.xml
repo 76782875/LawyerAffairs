@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lecshop.total.companyinfo.mapper.CompanyInfoMapper">
+    <resultMap id="companyInfoResult" type="com.lecshop.total.companyinfo.bean.CompanyInfo">
+        <result column="id" property="id"/>
+        <result column="name" property="name"/>
+        <result column="code" property="code"/>
+        <result column="industry" property="industry"/>
+        <result column="address" property="address"/>
+        <result column="business_licence" property="businessLicence"/>
+        <result column="fax" property="fax"/>
+        <result column="total_consumption" property="totalConsumption"/>
+        <result column="start_time" property="startTime"/>
+        <result column="end_time" property="endTime"/>
+        <result column="vip_type" property="vipType"/>
+    </resultMap>
+    <update id="updateCompanyInfo" parameterType="com.lecshop.total.companyinfo.bean.CompanyInfo">
+        UPDATE ls_company_info c, ls_user u
+        SET u.name=#{user.name},u.status = #{user.status},c.name = #{name},c.code = #{code},
+        c.industry = #{industry},c.address = #{address},c.fax = #{fax},c.business_licence = #{businessLicence}
+        WHERE c.id = #{id} AND u.id = #{user.id}
+    </update>
+    <update id="updateCompanyInfoForPersonCentre" parameterType="com.lecshop.total.companyinfo.bean.CompanyInfo">
+        UPDATE ls_company_info SET name = #{name}, address = #{address}, fax = #{fax}, business_licence = #{businessLicence} WHERE id = #{id}
+    </update>
+    <insert id="addCompanyInfo" parameterType="com.lecshop.total.companyinfo.bean.CompanyInfo" keyProperty="id" useGeneratedKeys="true">
+        INSERT INTO ls_company_info (`name`,code,industry,address,fax,business_licence,total_consumption,vip_type,start_time)
+        VALUES (#{name},#{code},#{industry},#{address},#{fax},#{businessLicence},#{totalConsumption},'0',now())
+    </insert>
+    <select id="queryCompanyInfoById" parameterType="java.lang.Long" resultMap="companyInfoResult">
+        SELECT * FROM ls_company_info WHERE id=#{id}
+    </select>
+    <update id="updateCompanyInfoForVip" parameterType="com.lecshop.total.companyinfo.bean.CompanyInfo">
+        UPDATE ls_company_info SET start_time=#{startTime},end_time=#{endTime},vip_type=#{vipType}  WHERE id=#{id}
+    </update>
+</mapper>

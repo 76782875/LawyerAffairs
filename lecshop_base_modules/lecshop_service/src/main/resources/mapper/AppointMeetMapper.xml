@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lecshop.total.affairlist.mapper.AppointMeetMapper">
+    <resultMap id="BaseResult" type="com.lecshop.total.affairlist.bean.AppointMeet">
+        <result column="id" property="id"/>
+        <result column="company_id" property="companyId"/>
+        <result column="user_id" property="userId"/>
+        <result column="lawyer_id" property="lawyerId"/>
+        <result column="type" property="type"/>
+        <result column="meet_type" property="meetType"/>
+        <result column="status" property="status"/>
+        <result column="score" property="score"/>
+        <result column="desc" property="desc"/>
+        <result column="consult_type" property="consultType"/>
+        <result column="meet_time" property="meetTime"/>
+        <result column="meet_address" property="meetAddress"/>
+        <result column="create_time" property="createTime"/>
+        <result column="lawyerName" property="lawyer.name"/>
+        <result column="companyName" property="companyInfo.name"/>
+        <result column="userName" property="user.name"/>
+    </resultMap>
+    <select id="queryAppointMeetCount" parameterType="java.util.Map" resultType="java.lang.Integer">
+        SELECT COUNT(1) FROM
+        (SELECT m.*,ci.`name` AS companyName,u.`name` AS userName
+        FROM ls_meeting AS m LEFT JOIN (ls_company_info AS ci,ls_user AS u)
+        ON (m.company_id=ci.id AND m.user_id=u.id)
+        ) AS mcu LEFT JOIN ls_lawyer AS l ON mcu.lawyer_id=l.id WHERE 1=1
+        <if test="type !='' and type !=null">
+            AND mcu.`type`=#{type}
+        </if>
+        <if test='meetType !="" and meetType !=null and meetType!= "3"'>
+            AND mcu.meet_type=#{meetType}
+        </if>
+
+        <if test='meetType =="3"'>
+            AND mcu.meet_type='2' and mcu.lawyer_id = -1
+        </if>
+
+        <if test="lawyerName !='' and lawyerName !=null">
+            AND l.`name` LIKE CONCAT(CONCAT('%', #{lawyerName}), '%')
+        </if>
+        <if test="companyName !='' and companyName !=null">
+            AND mcu.companyName LIKE CONCAT(CONCAT('%', #{companyName}), '%')
+        </if>
+        <if test="companyId !='' and companyId != 0 ">
+            AND company_id=#{companyId}
+        </if>
+        <if test="userId !='' and userId != 0 ">
+            AND user_id=#{userId}
+        </if>
+        <if test="lawyerId !='' and lawyerId != 0 ">
+            AND lawyer_id=#{lawyerId}
+        </if>
+    </select>
+    <select id="queryAppointMeet" parameterType="java.util.Map" resultMap="BaseResult">
+        SELECT mcu.*,l.`name` AS lawyerName FROM
+        (
+        SELECT m.*,ci.`name` AS companyName,u.`name` AS userName
+        FROM ls_meeting AS m LEFT JOIN (ls_company_info AS ci,ls_user AS u)
+        ON (m.company_id=ci.id AND m.user_id=u.id)
+        ) AS mcu LEFT JOIN ls_lawyer AS l ON mcu.lawyer_id=l.id WHERE 1=1
+        <if test="type !='' and type !=null">
+            AND mcu.`type`=#{type}
+        </if>
+        <if test='meetType !="" and meetType !=null and meetType!= "3"'>
+            AND mcu.meet_type=#{meetType}
+        </if>
+        <if test='meetType =="3"'>
+            AND mcu.meet_type='2' and mcu.lawyer_id = -1
+        </if>
+
+        <if test="lawyerName !='' and lawyerName !=null">
+            AND l.`name` LIKE CONCAT(CONCAT('%', #{lawyerName}), '%')
+        </if>
+        <if test="companyName !='' and companyName !=null">
+            AND mcu.companyName LIKE CONCAT(CONCAT('%', #{companyName}), '%')
+        </if>
+        <if test="companyId !='' and companyId != 0 ">
+            AND company_id=#{companyId}
+        </if>
+        <if test="userId !='' and userId != 0 ">
+            AND user_id=#{userId}
+        </if>
+        <if test="lawyerId !='' and lawyerId != 0 ">
+            AND lawyer_id=#{lawyerId}
+        </if>
+        ORDER BY create_time DESC
+        limit #{startRowNum},#{pageSize}
+    </select>
+    <select id="queryToDoAppointMeet" parameterType="java.util.Map" resultMap="BaseResult">
+        SELECT m.*,l.`name` AS lawyerName FROM ls_meeting AS m JOIN ls_lawyer AS l ON m.lawyer_id=l.id
+        WHERE m.status ='2' AND m.status='4' AND m.company_id=#{companyId}
+        <if test="userId">
+            AND m.user_id=#{userId}
+        </if>
+    </select>
+    <insert id="addAppointMeet" parameterType="com.lecshop.total.affairlist.bean.AppointMeet">
+          INSERT INTO ls_meeting (company_id,user_id,lawyer_id,`type`,meet_type,status,create_time,meet_time,meet_address,score,`desc`,consult_type)
+          VALUES (#{companyId},#{userId},#{lawyerId},#{type},#{meetType},#{status},now(),#{meetTime},#{meetAddress},#{score},#{desc},#{consultType})
+    </insert>
+    <update id="grabAppointMeet" parameterType="java.util.Map">
+        update ls_meeting set lawyer_id = #{lawyerId} , status = '2' where id = #{id} and meet_type ='2' and lawyer_id = '-1' and status = '0'
+    </update>
+
+    <update id="changeStatus" parameterType="java.util.Map">
+        update ls_meeting set  status = #{status} where id = #{id}
+    </update>
+    <update id="gradeForMeeting" parameterType="java.util.Map">
+        UPDATE ls_meeting set score = #{score} WHERE id = #{id}
+    </update>
+    <select id="queryAppointMeetById" resultMap="BaseResult" parameterType="java.lang.Long">
+        SELECT * FROM ls_meeting WHERE id=#{id}
+    </select>
+    <select id="queryAppointMeetCountByTime" resultType="java.lang.Integer" parameterType="java.util.Map">
+        SELECT COUNT(0) FROM ls_meeting WHERE create_time >= #{time} AND company_id = #{companyId}
+    </select>
+
+    <select id="queryMeetingOrderCount" parameterType="java.util.Map" resultType="java.lang.Integer">
+        SELECT COUNT(1) FROM ls_meeting WHERE lawyer_id = #{id}
+        <if test='(startTime != null and startTime != "") and (endTime != null and endTime != "")'>
+            AND create_time BETWEEN #{startTime} AND #{endTime}
+        </if>
+    </select>
+    <select id="queryMeetingOrderCountOfCompany" parameterType="java.util.Map" resultType="java.lang.Integer">
+        SELECT COUNT(1) FROM ls_meeting WHERE company_id = #{id}
+        <if test='(startTime != null and startTime != "") and (endTime != null and endTime != "")'>
+            AND create_time BETWEEN #{startTime} AND #{endTime}
+        </if>
+    </select>
+</mapper>

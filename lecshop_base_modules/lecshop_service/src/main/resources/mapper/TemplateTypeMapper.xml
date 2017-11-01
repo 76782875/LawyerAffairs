@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lecshop.total.templatetype.mapper.TemplateTypeMapper">
+
+    <resultMap id="templateTypeResult" type="com.lecshop.total.templatetype.bean.TemplateType">
+        <result column="id" property="id"/>
+        <result column="name" property="name"/>
+        <result column="sort" property="sort"/>
+        <result column="del_flag" property="delFlag"/>
+        <result column="create_time" property="createTime"/>
+        <result column="parent_id" property="parentId"/>
+        <result column="grade" property="grade"/>
+        <result column="code" property="code"/>
+    </resultMap>
+
+    <select id="queryTemplateTypeList" resultMap="templateTypeResult">
+        SELECT id,name,sort,del_flag,create_time,parent_id,grade,code FROM ls_templage_type WHERE del_flag = '0' ORDER BY parent_id,sort
+    </select>
+
+    <select id="queryChildByParentId" parameterType="java.lang.Long" resultMap="templateTypeResult">
+        SELECT id,name,sort,del_flag,create_time,parent_id,grade,code FROM ls_templage_type WHERE parent_id = #{parentId} AND del_flag = '0'
+    </select>
+
+    <update id="deleteTemplateType" parameterType="com.lecshop.total.templatetype.bean.TemplateType">
+        UPDATE ls_templage_type SET del_flag = '1' WHERE id = #{id} OR parent_id = #{id}
+        OR parent_id in (SELECT t.id FROM (SELECT id FROM ls_templage_type WHERE parent_id = #{id}) t)
+    </update>
+
+    <select id="queryTemplateTypeById" parameterType="java.lang.Long" resultMap="templateTypeResult">
+        SELECT id,name,sort,del_flag,create_time,parent_id,grade,code FROM ls_templage_type WHERE id = #{id}
+    </select>
+
+    <update id="updateTemplateType" parameterType="com.lecshop.total.templatetype.bean.TemplateType">
+        UPDATE ls_templage_type SET name = #{name},sort = #{sort}, parent_id = #{parentId}, grade = #{grade}, code = #{code} WHERE id = #{id}
+    </update>
+
+    <insert id="addTemplateType" parameterType="com.lecshop.total.templatetype.bean.TemplateType">
+        INSERT INTO ls_templage_type (name, sort, del_flag, create_time, parent_id, grade, code) VALUES (#{name}, #{sort}, '0', NOW(), #{parentId}, #{grade}, #{code})
+    </insert>
+
+    <select id="queryTemplateTypeByGrade" parameterType="java.lang.Integer" resultMap="templateTypeResult">
+        SELECT id,name,sort,del_flag,create_time,parent_id,grade,code FROM ls_templage_type WHERE del_flag = '0' AND grade = #{grade}
+    </select>
+
+    <select id="queryTemplateTypeByName" parameterType="java.lang.String" resultMap="templateTypeResult">
+        SELECT id,name,sort,del_flag,create_time,parent_id,grade,code FROM ls_templage_type WHERE name = #{name} AND del_flag = '0'
+    </select>
+
+    <select id="queryTemplateIdsByFirstParentId" parameterType="java.lang.Long" resultType="java.lang.Long">
+        SELECT t.id FROM ls_templage_type a JOIN ls_templage_type b ON a.id = b.parent_id
+        JOIN ls_template t ON b.id = t.type_id WHERE a.parent_id = #{parentId} AND t.del_flag = '0' UNION
+        SELECT id FROM ls_template WHERE type_id = #{parentId} AND del_flag = '0'
+    </select>
+
+    <select id="queryTemplateIdsBySecondParentId" parameterType="java.lang.Long" resultType="java.lang.Long">
+        SELECT tem.id FROM ls_templage_type ty JOIN ls_template tem ON ty.id = tem.type_id
+        WHERE ty.parent_id = #{parentId} AND ty.grade = 3 AND tem.del_flag = '0' UNION
+        SELECT id FROM ls_template WHERE type_id = #{parentId} AND del_flag = '0'
+    </select>
+</mapper>

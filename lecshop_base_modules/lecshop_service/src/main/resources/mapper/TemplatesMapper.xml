@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lecshop.total.template.mapper.TemplatesMapper">
+
+    <resultMap id="templateResult" type="com.lecshop.total.template.bean.Template">
+        <result column="id" property="id"/>
+        <result column="name" property="name"/>
+        <result column="type_id" property="typeId"/>
+        <result column="url" property="url"/>
+        <result column="del_flag" property="delFlag"/>
+        <result column="create_time" property="createTime"/>
+        <result column="templateTypeName" property="templateType.name"/>
+    </resultMap>
+
+    <select id="queryTemplateList" parameterType="java.util.Map" resultMap="templateResult">
+        SELECT t.id AS id,t.`name` AS name,t.type_id AS type_id,t.url AS url,t.del_flag AS del_flag,t.create_time AS
+        create_time, y.`name` AS templateTypeName
+        FROM ls_template t JOIN ls_templage_type y ON t.type_id = y.id WHERE t.del_flag='0'
+        <if test='name != null and !"".equals(name)'>
+            AND t.name LIKE CONCAT(CONCAT('%', #{name}), '%')
+        </if>
+        ORDER BY t.create_time DESC
+        limit #{startRowNum},#{pageSize}
+    </select>
+
+    <select id="queryTemplateCount" parameterType="java.util.Map" resultType="java.lang.Integer">
+        SELECT count(1)
+        FROM ls_template t JOIN ls_templage_type y ON t.type_id = y.id WHERE t.del_flag='0'
+        <if test='name != null and !"".equals(name)'>
+            AND t.name LIKE CONCAT(CONCAT('%', #{name}), '%')
+        </if>
+    </select>
+
+    <select id="queryTemplateForDownload" parameterType="java.util.Map" resultMap="templateResult">
+        SELECT tem.id,tem.`name`,tem.url,ty.`name` AS templateTypeName
+        FROM ls_template tem JOIN ls_templage_type ty ON tem.type_id = ty.id
+        WHERE tem.del_flag = '0'
+        <if test="typeIds.length != 0 and typeIds != null">
+            AND tem.id IN
+            <foreach collection="typeIds" close=")" open="(" index="index" item="item" separator=",">
+                #{item}
+            </foreach>
+        </if>
+        <if test="typeId != 0 and typeId != null">
+            AND tem.type_id = #{typeId}
+        </if>
+        <if test='name != null and !"".equals(name)'>
+            AND tem.`name` LIKE CONCAT(CONCAT('%',#{name}),'%')
+        </if>
+        ORDER BY tem.create_time DESC
+        limit #{startRowNum},#{pageSize}
+    </select>
+
+    <select id="queryTemplateForDownloadCount" parameterType="java.util.Map" resultType="java.lang.Integer">
+        SELECT COUNT(1)
+        FROM ls_template tem JOIN ls_templage_type ty ON tem.type_id = ty.id
+        WHERE tem.del_flag = '0'
+        <if test="typeIds.length != 0 and typeIds != null">
+            AND tem.id IN
+            <foreach collection="typeIds" close=")" open="(" index="index" item="item" separator=",">
+                #{item}
+            </foreach>
+        </if>
+        <if test="typeId != 0 and typeId != null">
+            AND tem.type_id = #{typeId}
+        </if>
+        <if test='name != null and !"".equals(name)'>
+            AND tem.`name` LIKE CONCAT(CONCAT('%',#{name}),'%')
+        </if>
+    </select>
+
+    <update id="deleteTemplate" parameterType="java.lang.Long">
+        UPDATE ls_template SET del_flag = '1' WHERE id = #{id}
+    </update>
+
+    <select id="queryTemplateById" parameterType="java.lang.Long" resultMap="templateResult">
+        SELECT * FROM ls_template WHERE id = #{id}
+    </select>
+
+    <update id="updateTemplate" parameterType="com.lecshop.total.template.bean.Template">
+        UPDATE ls_template SET name = #{name}, type_id = #{typeId} WHERE id = #{id}
+    </update>
+
+    <insert id="addTemplate" parameterType="com.lecshop.total.template.bean.Template">
+        INSERT INTO ls_template (`name`,type_id,url,del_flag,create_time) VALUES (#{name},#{typeId},#{url},'0',now())
+    </insert>
+
+    <select id="queryTemplateByName" parameterType="java.lang.String" resultMap="templateResult">
+        SELECT * FROM  ls_template WHERE `name`=#{name}
+    </select>
+</mapper>

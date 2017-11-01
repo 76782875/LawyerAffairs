@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lecshop.admin.profitset.mapper.ProfitSetMapper">
+    <resultMap id="BaseResult" type="com.lecshop.admin.profitset.bean.ProfitSet">
+        <result column="id" property="id"/>
+        <result column="withdraw_time" property="withdrawTime"/>
+        <result column="tel_con_money" property="telConMoney"/>
+        <result column="tel_con_commission" property="telConCommission"/>
+        <result column="meet_money" property="meetMoney"/>
+        <result column="meet_commission" property="meetCommission"/>
+        <result column="meet_all_money" property="meetAllMoney"/>
+        <result column="meet_all_commisson" property="meetAllCommisson"/>
+        <result column="modify_doc_money" property="modifyDocMoney"/>
+        <result column="modify_doc_commission" property="modifyDocCommission"/>
+        <result column="draft_doc_money" property="draftDocMoney"/>
+        <result column="draft_doc_commission" property="draftDocCommission"/>
+        <result column="lawyer_letter_money" property="lawyerLetterMoney"/>
+        <result column="lawyer_letter_commission" property="lawyerLetterCommission"/>
+    </resultMap>
+    <select id="queryProfitSet" resultMap="BaseResult">
+          SELECT * FROM ls_sys_setting
+    </select>
+    <update id="editProfitSet" parameterType="java.util.Map">
+        UPDATE ls_sys_setting SET
+        <if test="param ==1">
+            tel_con_money=#{profitSet.telConMoney},tel_con_commission=#{profitSet.telConCommission}
+        </if>
+        <if test="param ==2">
+            meet_all_money=#{profitSet.meetAllMoney},meet_all_commisson=#{profitSet.meetAllCommisson}
+        </if>
+        <if test="param ==3">
+            meet_money=#{profitSet.meetMoney},meet_commission=#{profitSet.meetCommission}
+        </if>
+        <if test="param ==4">
+            withdraw_time=#{profitSet.withdrawTime}
+        </if>
+        <if test="param == 5">
+            modify_doc_money = #{profitSet.modifyDocMoney},modify_doc_commission = #{profitSet.modifyDocCommission}
+        </if>
+        <if test="param == 6">
+            draft_doc_money=#{profitSet.draftDocMoney},draft_doc_commission=#{profitSet.draftDocCommission}
+        </if>
+        <if test="param == 7">
+            lawyer_letter_money=#{profitSet.lawyerLetterMoney},lawyer_letter_commission=#{profitSet.lawyerLetterCommission}
+        </if>
+    </update>
+</mapper>

@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lecshop.total.affairlist.mapper.ImportantMatterMapper">
+    <resultMap id="BaseResult" type="com.lecshop.total.affairlist.bean.ImportantMatter">
+        <id column="id" property="id"/>
+        <result column="company_id" property="companyId"/>
+        <result column="user_id" property="userId"/>
+        <result column="lawyer_id" property="lawyerId"/>
+        <result column="status" property="status"/>
+        <result column="price" property="price"/>
+        <result column="desc" property="desc"/>
+        <result column="consult_type" property="consultType"/>
+        <result column="score" property="score"/>
+        <result column="create_time" property="createTime"/>
+        <result column="lawyerName" property="lawyer.name"/>
+        <result column="companyName" property="companyInfo.name"/>
+        <result column="userName" property="user.name"/>
+    </resultMap>
+    <select id="queryImportantMatterCount" parameterType="java.util.Map" resultType="java.lang.Integer">
+        SELECT COUNT(1) FROM
+        (SELECT im.*,ci.`name` AS companyName,u.`name` AS userName
+        FROM ls_important_matter AS im LEFT JOIN (ls_company_info AS ci,ls_user AS u)
+        ON (im.company_id=ci.id AND im.user_id=u.id)
+        ) AS mcu LEFT JOIN ls_lawyer AS l ON mcu.lawyer_id=l.id WHERE 1=1
+        <if test="type !='' and type !=null">
+            AND mcu.`type`=#{type}
+        </if>
+        <if test="meetType !='' and meetType !=null">
+            AND mcu.meet_type=#{meetType}
+        </if>
+        <if test="lawyerName !='' and lawyerName !=null">
+            AND l.`name` LIKE CONCAT(CONCAT('%', #{lawyerName}), '%')
+        </if>
+        <if test="companyName !='' and companyName !=null">
+            AND mcu.companyName LIKE CONCAT(CONCAT('%', #{companyName}), '%')
+        </if>
+        <if test="companyId !='' and companyId != 0 ">
+            AND company_id=#{companyId}
+        </if>
+        <if test="userId !='' and userId != 0 ">
+            AND user_id=#{userId}
+        </if>
+        <if test="lawyerId !='' and lawyerId != 0 ">
+            AND lawyer_id=#{lawyerId}
+        </if>
+    </select>
+    <select id="queryImportantMatter" parameterType="java.util.Map" resultMap="BaseResult">
+        SELECT mcu.*,l.`name` AS lawyerName FROM
+        (
+        SELECT im.*,ci.`name` AS companyName,u.`name` AS userName
+        FROM ls_important_matter AS im LEFT JOIN (ls_company_info AS ci,ls_user AS u)
+        ON (im.company_id=ci.id AND im.user_id=u.id)
+        ) AS mcu LEFT JOIN ls_lawyer AS l ON mcu.lawyer_id=l.id WHERE 1=1
+        <if test="type !='' and type !=null">
+            AND mcu.`type`=#{type}
+        </if>
+        <if test="meetType !='' and meetType !=null">
+            AND mcu.meet_type=#{meetType}
+        </if>
+        <if test="lawyerName !='' and lawyerName !=null">
+            AND l.`name` LIKE CONCAT(CONCAT('%', #{lawyerName}), '%')
+        </if>
+        <if test="companyName !='' and companyName !=null">
+            AND mcu.companyName LIKE CONCAT(CONCAT('%', #{companyName}), '%')
+        </if>
+        <if test="companyId !='' and companyId != 0 ">
+            AND company_id=#{companyId}
+        </if>
+        <if test="userId !='' and userId != 0 ">
+            AND user_id=#{userId}
+        </if>
+        <if test="lawyerId !='' and lawyerId != 0 ">
+            AND lawyer_id=#{lawyerId}
+        </if>
+        ORDER BY create_time DESC
+        limit #{startRowNum},#{pageSize}
+    </select>
+    <select id="queryToDoImportantMatter" parameterType="java.util.Map" resultMap="BaseResult">
+        SELECT im.*,l.`name` AS lawyerName FROM ls_important_matter AS im JOIN ls_lawyer AS l ON im.lawyer_id=l.id
+        WHERE im.status != '0' AND im.status != '1' AND im.status != '5' AND im.company_id=#{companyId}
+        <if test="userId">
+            AND im.user_id=#{userId}
+        </if>
+    </select>
+    <update id="changeImportantMatterStatus" parameterType="java.util.Map">
+        UPDATE ls_important_matter SET status = #{status} WHERE id = #{id}
+    </update>
+    <update id="gradeForImportantMatter" parameterType="java.util.Map">
+        UPDATE ls_important_matter SET score = #{score} WHERE id = #{id}
+    </update>
+
+    <update id="confirmImportantMatter" parameterType="java.util.Map">
+          UPDATE ls_important_matter SET status = '2' ,price = #{money} WHERE id = #{id}
+     </update>
+    <select id="queryImportantMatterById" resultMap="BaseResult" parameterType="java.lang.Long">
+        SELECT * FROM ls_important_matter WHERE id=#{id}
+    </select>
+    <insert id="addImportantMatter" parameterType="com.lecshop.total.affairlist.bean.ImportantMatter">
+        INSERT INTO ls_important_matter (company_id,user_id,lawyer_id,status,`desc`,consult_type,score,create_time)
+        VALUES (#{companyId},#{userId},#{lawyerId},'0',#{desc},#{consultType},#{score},now())
+    </insert>
+
+    <select id="queryImportantMatterOrderCount" parameterType="java.util.Map" resultType="java.lang.Integer">
+        SELECT COUNT(1) FROM ls_important_matter WHERE lawyer_id = #{id}
+        <if test='(startTime != null and startTime != "") and (endTime != null and endTime != "")'>
+            AND create_time BETWEEN #{startTime} AND #{endTime}
+        </if>
+    </select>
+    <select id="queryImportantMatterOrderCountOfCompany" parameterType="java.util.Map" resultType="java.lang.Integer">
+        SELECT COUNT(1) FROM ls_important_matter WHERE company_id = #{id}
+        <if test='(startTime != null and startTime != "") and (endTime != null and endTime != "")'>
+            AND create_time BETWEEN #{startTime} AND #{endTime}
+        </if>
+    </select>
+</mapper>

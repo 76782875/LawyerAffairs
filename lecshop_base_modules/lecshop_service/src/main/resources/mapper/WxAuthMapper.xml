@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lecshop.lawyer.wxauth.mapper.WxAuthMapper">
+    <resultMap id="wxAuth" type="com.lecshop.lawyer.wxauth.bean.WxAuth">
+        <result column="id" property="id"/>
+        <result column="wx_openid" property="wxOpenId"/>
+        <result column="lawyer_id" property="lawyerId"/>
+    </resultMap>
+
+    <select id="queryByOpenId" resultMap="wxAuth">
+        SELECT * FROM ls_wx_auth where wx_openid = #{openId}
+    </select>
+
+    <insert id="addWxAuth" parameterType="com.lecshop.lawyer.wxauth.bean.WxAuth">
+        INSERT INTO ls_wx_auth (wx_openid,lawyer_id)
+        VALUES (#{wxOpenId},#{lawyerId})
+    </insert>
+    <select id="queryOpenIdsByLawyerList" parameterType="java.util.List" resultType="java.lang.String">
+        SELECT wx_openid FROM ls_wx_auth WHERE lawyer_id IN
+        <foreach collection="list" index="index" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </select>
+</mapper>

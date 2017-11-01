@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lecshop.admin.payset.mapper.PaySetMapper">
+    <resultMap id="BaseResult" type="com.lecshop.admin.payset.bean.PaySet">
+        <result column="id" property="id"/>
+        <result column="codeType" property="codeType"/>
+        <result column="column_name" property="columnName"/>
+        <result column="column_value" property="columnValue"/>
+    </resultMap>
+    <select id="queryPaySet" resultMap="BaseResult">
+        SELECT id,codeType,`column_name`,column_value FROM ls_pay_setting
+    </select>
+    <delete id="deletePaySet" parameterType="java.lang.String">
+        DELETE  FROM ls_pay_setting WHERE codeType=#{codeType}
+    </delete>
+    <insert id="addPaySet" parameterType="com.lecshop.admin.payset.bean.PaySet">
+        INSERT INTO ls_pay_setting (codeType,`column_name`,column_value) VALUES
+        <foreach collection="list" index="index" item="paySet" separator=",">
+            (
+            #{paySet.codeType},#{paySet.columnName},#{paySet.columnValue}
+            )
+        </foreach>
+    </insert>
+</mapper>

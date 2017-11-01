@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lecshop.total.companyinfo.mapper.CompanyTransactionMapper">
+
+    <resultMap id="companyTransactionResult" type="com.lecshop.total.companyinfo.bean.CompanyTransaction">
+        <result column="id" property="id"/>
+        <result column="name" property="name"/>
+        <result column="affairCount" property="affairCount"/>
+        <result column="money" property="money"/>
+    </resultMap>
+
+    <select id="queryCompany" parameterType="java.util.Map" resultMap="companyTransactionResult">
+        SELECT id,`name` FROM ls_company_info limit #{startRowNum},#{pageSize}
+    </select>
+
+    <select id="queryCompanyCount" parameterType="java.util.Map" resultType="int">
+        SELECT COUNT(1) FROM ls_company_info
+    </select>
+</mapper>

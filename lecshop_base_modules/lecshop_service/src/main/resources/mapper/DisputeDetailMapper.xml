@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lecshop.total.affairlist.mapper.DisputeDetailMapper">
+    <resultMap id="disputeDetail" type="com.lecshop.total.affairlist.bean.DisputeDetail">
+        <result column="id" property="id"/>
+        <result column="dispute_id" property="disputeId"/>
+        <result column="type" property="type"/>
+        <result column="desc" property="desc"/>
+        <result column="url" property="url"/>
+        <result column="status" property="status"/>
+        <result column="code" property="code"/>
+        <result column="create_time" property="createTime"/>
+    </resultMap>
+
+    <select id="queryByDisputeId" parameterType="java.lang.Long" resultMap="disputeDetail">
+        select * from ls_disputes_detail where dispute_id = #{disputeId}
+    </select>
+
+    <select id="queryByDisputeIdAndCode" parameterType="java.util.Map" resultMap="disputeDetail">
+        select * from ls_disputes_detail where dispute_id = #{disputeId} and code = #{code}
+    </select>
+    <update id="updateDisputeDetail" parameterType="com.lecshop.total.affairlist.bean.DisputeDetail">
+        update ls_disputes_detail set `desc` = #{desc} , status = '1' , url = #{url} where  dispute_id = #{disputeId} and code = #{code}
+    </update>
+    <insert id="addDisputeDetail" parameterType="java.util.List">
+        INSERT INTO ls_disputes_detail (dispute_id,`type`,`desc`,url,status,code,create_time) VALUES
+        <foreach collection="list" index="index" item="item" separator=",">
+            (
+            #{item.disputeId},#{item.type},#{item.desc},#{item.url},#{item.status},#{item.code},now()
+            )
+        </foreach>
+    </insert>
+</mapper>

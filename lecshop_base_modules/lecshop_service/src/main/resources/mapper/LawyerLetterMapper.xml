@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lecshop.total.affairlist.mapper.LawyerLetterMapper">
+
+    <resultMap id="lawyerLetterResult" type="com.lecshop.total.affairlist.bean.LawyerLetter">
+        <result column="id" property="id"/>
+        <result column="company_id" property="companyId"/>
+        <result column="user_id" property="userId"/>
+        <result column="lawyer_id" property="lawyerId"/>
+        <result column="mobile" property="mobile"/>
+        <result column="address" property="address"/>
+        <result column="status" property="status"/>
+        <result column="create_time" property="createTime"/>
+        <result column="score" property="score"/>
+        <result column="lawyerName" property="lawyer.name"/>
+        <result column="lawyerMobile" property="lawyer.mobile"/>
+        <result column="companyName" property="companyInfo.name"/>
+        <result column="userName" property="user.name"/>
+    </resultMap>
+
+    <select id="queryLawyerLetterCount" parameterType="java.util.Map" resultType="java.lang.Integer">
+        SELECT COUNT(1) FROM
+        (SELECT lll.*,ci.`name` AS companyName,u.`name` AS userName
+        FROM ls_lawyer_letter AS lll LEFT JOIN (ls_company_info AS ci,ls_user AS u)
+        ON (lll.company_id=ci.id AND lll.user_id=u.id)
+        ) AS mcu LEFT JOIN ls_lawyer AS l ON mcu.lawyer_id=l.id WHERE 1=1
+        <if test="companyId != 0 ">
+            AND mcu.company_id=#{companyId}
+        </if>
+        <if test="userId != 0 ">
+            AND mcu.user_id=#{userId}
+        </if>
+        <if test="lawyerId != 0 ">
+            AND mcu.lawyer_id=#{lawyerId}
+        </if>
+        <if test="lawyerName !='' and lawyerName !=null">
+            AND l.`name` LIKE CONCAT(CONCAT('%', #{lawyerName}), '%')
+        </if>
+        <if test="companyName !='' and companyName !=null">
+            AND mcu.companyName LIKE CONCAT(CONCAT('%', #{companyName}), '%')
+        </if>
+    </select>
+    <select id="queryLawyerLetter" parameterType="java.util.Map" resultMap="lawyerLetterResult">
+        SELECT mcu.*,l.`name` AS lawyerName ,l.mobile AS lawyerMobile FROM
+        (
+        SELECT lll.*,ci.`name` AS companyName,u.`name` AS userName
+        FROM ls_lawyer_letter AS lll LEFT JOIN (ls_company_info AS ci,ls_user AS u)
+        ON (lll.company_id=ci.id AND lll.user_id=u.id)
+        ) AS mcu LEFT JOIN ls_lawyer AS l ON mcu.lawyer_id=l.id WHERE 1=1
+        <if test="companyId != 0 ">
+            AND mcu.company_id=#{companyId}
+        </if>
+        <if test="userId != 0 ">
+            AND mcu.user_id=#{userId}
+        </if>
+        <if test="lawyerId != 0 ">
+            AND mcu.lawyer_id=#{lawyerId}
+        </if>
+        <if test="lawyerName !='' and lawyerName !=null">
+            AND l.`name` LIKE CONCAT(CONCAT('%', #{lawyerName}), '%')
+        </if>
+        <if test="companyName !='' and companyName !=null">
+            AND mcu.companyName LIKE CONCAT(CONCAT('%', #{companyName}), '%')
+        </if>
+        ORDER BY create_time DESC
+        limit #{startRowNum},#{pageSize}
+    </select>
+    <select id="queryToDoLawyerLetter" parameterType="java.util.Map" resultMap="lawyerLetterResult">
+        SELECT ll.*,l.`name` AS lawyerName FROM ls_lawyer_letter AS ll JOIN ls_lawyer AS l ON ll.lawyer_id=l.id
+        WHERE ll.status!='3' AND ll.status!='0' AND ll.company_id=#{companyId}
+        <if test="userId !=0">
+            AND ll.user_id=#{userId}
+        </if>
+    </select>
+    <insert id="addLawyerLetter" useGeneratedKeys="true" keyProperty="id"
+            parameterType="com.lecshop.total.affairlist.bean.LawyerLetter">
+        INSERT INTO ls_lawyer_letter (company_id, user_id, lawyer_id, mobile, address, create_time, status) VALUES
+        (#{companyId},#{userId},#{lawyerId},#{mobile},#{address},NOW(),'0')
+    </insert>
+
+    <update id="changeLawyerLetterStatus" parameterType="java.util.Map">
+        update ls_lawyer_letter set status = #{status} where id = #{id}
+    </update>
+    <update id="gradeForLawyerLetter" parameterType="java.util.Map">
+        update ls_lawyer_letter set score = #{score} where id = #{id}
+    </update>
+
+    <select id="queryLawyerLetterOrderCount" parameterType="java.util.Map" resultType="java.lang.Integer">
+        SELECT COUNT(1) FROM ls_lawyer_letter let WHERE let.lawyer_id = #{id}
+        <if test='(startTime != null and startTime != "") and (endTime != null and endTime != "")'>
+            AND let.create_time BETWEEN #{startTime} AND #{endTime}
+        </if>
+    </select>
+    <select id="queryLawyerLetterOrderCountOfCompany" parameterType="java.util.Map" resultType="java.lang.Integer">
+        SELECT COUNT(1) FROM ls_lawyer_letter let WHERE let.company_id = #{id}
+        <if test='(startTime != null and startTime != "") and (endTime != null and endTime != "")'>
+            AND let.create_time BETWEEN #{startTime} AND #{endTime}
+        </if>
+    </select>
+</mapper>

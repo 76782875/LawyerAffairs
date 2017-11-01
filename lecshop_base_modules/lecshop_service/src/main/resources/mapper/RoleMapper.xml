@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lecshop.admin.role.mapper.RoleMapper">
+    <resultMap id="BaseResult" type="com.lecshop.admin.role.bean.Role">
+        <id column="id" property="id"/>
+        <result column="name" property="roleName"/>
+        <result column="del_flag" property="delFlag"/>
+        <result column="create_time" property="createTime"/>
+    </resultMap>
+    <select id="queryRoleCount" parameterType="java.util.Map" resultType="java.lang.Integer">
+        select count(1) from ls_role where del_flag='0' AND id!=1
+        <if test="roleName != null">
+            AND `name` like CONCAT(CONCAT('%', #{roleName}),'%')
+        </if>
+    </select>
+    <select id="queryAllRole" parameterType="java.util.Map" resultMap="BaseResult">
+        select id,`name`,create_time from ls_role
+        where del_flag='0' AND id!=1
+        <if test="roleName != null">
+            AND `name` like CONCAT(CONCAT('%', #{roleName}),'%')
+        </if>
+        <if test="isPaging ==1">
+            limit #{startRowNum},#{pageSize}
+        </if>
+    </select>
+    <insert id="addRole" parameterType="com.lecshop.admin.role.bean.Role" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO ls_role (`name`,create_time,del_flag) VALUES (#{roleName},now(),'0')
+    </insert>
+    <insert id="addRoleAndAuth" parameterType="java.util.List">
+        INSERT INTO ls_role_authority (role_id,authority_id) VALUES
+        <foreach collection="list" index="index" item="roleAndAuth" separator=",">
+            (
+            #{roleAndAuth.roleId},#{roleAndAuth.id}
+            )
+        </foreach>
+    </insert>
+    <select id="queryAuthIdByRoleId" parameterType="java.lang.Long" resultType="java.lang.Long">
+          SELECT authority_id FROM ls_role_authority WHERE role_id=#{roleId}
+    </select>
+    <delete id="deleteAllAuthByRoleId" parameterType="java.util.List">
+        DELETE FROM ls_role_authority WHERE role_id IN
+        <foreach collection="array" index="index" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
+    <update id="editRoleName" parameterType="com.lecshop.admin.role.bean.Role">
+        UPDATE ls_role SET `name`=#{roleName} WHERE id=#{id}
+    </update>
+    <delete id="deleteRole" parameterType="java.util.List">
+        UPDATE ls_role SET del_flag='1' WHERE id IN
+        <foreach collection="array" index="index" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
+    <select id="roleNameCheck" parameterType="java.lang.String" resultMap="BaseResult">
+        SELECT * FROM ls_role WHERE `name`=#{roleName}
+    </select>
+</mapper>

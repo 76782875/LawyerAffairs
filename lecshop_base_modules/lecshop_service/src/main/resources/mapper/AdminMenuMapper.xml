@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lecshop.admin.adminmenu.mapper.AdminMenuMapper">
+    <resultMap id="BaseResult" type="com.lecshop.admin.adminmenu.bean.AdminMenu">
+        <result column="role_id" property="roleId"/>
+        <result column="authority_id" property="authorityId"/>
+        <result column="name" property="name"/>
+        <result column="url" property="url"/>
+        <result column="parentId" property="parentId"/>
+        <result column="grade" property="grade"/>
+        <result column="sort" property="sort"/>
+    </resultMap>
+    <select id="queryAdminMenu" resultMap="BaseResult" parameterType="java.lang.Long">
+        SELECT ra.role_id,ra.authority_id,a.name,a.url,a.parentId,a.grade,a.sort FROM
+        (SELECT * FROM ls_role_authority WHERE role_id=(SELECT role_id FROM ls_manager_role WHERE manager_id=#{managerId})) AS ra
+        JOIN ls_authority AS a ON ra.authority_id=a.id ORDER BY a.parentId,a.sort
+    </select>
+</mapper>

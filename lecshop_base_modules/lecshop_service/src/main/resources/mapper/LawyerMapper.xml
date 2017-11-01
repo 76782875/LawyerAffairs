@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lecshop.total.lawyer.mapper.LawyerMapper">
+    <resultMap id="lawyerResult" type="com.lecshop.total.lawyer.bean.Lawyer">
+        <result column="id" property="id"/>
+        <result column="name" property="name"/>
+        <result column="mobile" property="mobile"/>
+        <result column="password" property="password"/>
+        <result column="code" property="code"/>
+        <result column="lawyer_pic" property="lawyerPic"/>
+        <result column="address" property="address"/>
+        <result column="lawyers_place" property="lawyersPlace"/>
+        <result column="status" property="status"/>
+        <result column="type" property="type"/>
+        <result column="qq" property="qq"/>
+        <result column="email" property="email"/>
+        <result column="pic" property="pic"/>
+        <result column="balance" property="balance"/>
+        <result column="del_flag" property="delFlag"/>
+        <result column="search_forbid" property="searchForbid"/>
+    </resultMap>
+    <select id="queryLawyerList" parameterType="java.util.Map" resultMap="lawyerResult">
+        SELECT id,`name`,mobile,code,lawyer_pic,address,lawyers_place,status,`type`,qq,email,pic,balance,search_forbid
+        FROM ls_lawyer WHERE del_flag = '0'
+        <if test='name != null and !"".equals(name)'>
+            AND `name` LIKE CONCAT(CONCAT('%', #{name}),'%')
+        </if>
+        <if test='mobile != null and !"".equals(mobile)'>
+            AND mobile LIKE CONCAT(CONCAT('%', #{mobile}),'%')
+        </if>
+        <if test="status !=null and status !=''">
+            <if test="status ==0">
+                AND (status=#{status})
+            </if>
+            <if test="status ==2 or status ==3">
+                AND status = #{status}
+            </if>
+        </if>
+        ORDER BY id DESC
+        limit #{startRowNum},#{pageSize}
+    </select>
+    <select id="queryLawyerCount" parameterType="java.util.Map" resultType="java.lang.Integer">
+        SELECT count(1)
+        FROM ls_lawyer WHERE del_flag = '0'
+        <if test='name != null and !"".equals(name)'>
+            AND name LIKE CONCAT(CONCAT('%', #{name}),'%')
+        </if>
+        <if test='mobile != null and !"".equals(mobile)'>
+            AND mobile = #{mobile}
+        </if>
+        <if test="status !=null and status !=''">
+            <if test="status ==0">
+                AND (status=#{status})
+            </if>
+            <if test="status ==2 or status ==3">
+                AND status = #{status}
+            </if>
+        </if>
+    </select>
+    <update id="deleteLawyer" parameterType="java.lang.Long">
+        UPDATE ls_lawyer SET del_flag = '1' WHERE id = #{id}
+    </update>
+    <update id="batchDeleteLawyer" parameterType="java.lang.Long">
+        UPDATE ls_lawyer SET del_flag = '1' WHERE id IN
+        <foreach collection="array" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </update>
+    <select id="queryLawyerById" parameterType="java.lang.Long" resultMap="lawyerResult">
+        SELECT id,`name`,mobile,password,code,lawyer_pic,address,lawyers_place,status,`type`,qq,email,pic,balance,search_forbid
+        FROM ls_lawyer WHERE id = #{id}
+    </select>
+    <update id="auditLawyer" parameterType="com.lecshop.total.lawyer.bean.Lawyer">
+        UPDATE ls_lawyer SET status = #{status} WHERE id = #{id}
+    </update>
+    <insert id="addLawyer" parameterType="com.lecshop.total.lawyer.bean.Lawyer" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO ls_lawyer (`name`,mobile,password,code,lawyer_pic,address,lawyers_place,status,`type`,qq,email,pic,balance,search_forbid)
+        VALUES (#{name},#{mobile},#{password},#{code},#{lawyerPic},#{address},#{lawyersPlace},#{status},#{type},#{qq},#{email},#{pic},#{balance},#{searchForbid})
+    </insert>
+    <update id="updateLawyer" parameterType="com.lecshop.total.lawyer.bean.Lawyer">
+        UPDATE ls_lawyer SET name = #{name},code = #{code},lawyer_pic = #{lawyerPic},
+        address = #{address},lawyers_place = #{lawyersPlace},status = #{status},type = #{type},qq = #{qq},email = #{email},
+        pic = #{pic}, search_forbid = #{searchForbid} WHERE id = #{id}
+    </update>
+    <select id="queryLawyerOwn" resultMap="lawyerResult">
+        SELECT id,`name`,mobile,password,code,lawyer_pic,address,lawyers_place,status,`type`,qq,email,pic,balance,search_forbid
+        FROM ls_lawyer WHERE del_flag = '0' AND `type` = '1'
+    </select>
+
+    <select id="queryByMobile" resultMap="lawyerResult">
+        select * from  ls_lawyer WHERE del_flag = '0' AND mobile = #{mobile}
+    </select>
+
+    <update id="updatePassword" parameterType="java.util.Map">
+        update ls_lawyer set password = #{password} where mobile = #{mobile}
+    </update>
+
+    <update id="updateLawyerForCenter" parameterType="com.lecshop.total.lawyer.bean.Lawyer">
+        update ls_lawyer
+        <set>
+            <if test="name != null">
+                name = #{name},
+            </if>
+            <if test="pic != null">
+                pic = #{pic},
+            </if>
+            <if test="qq != null">
+                qq = #{qq},
+            </if>
+            <if test="email != null">
+                email = #{email},
+            </if>
+            <if test="lawyersPlace != null">
+                lawyers_place = #{lawyersPlace},
+            </if>
+            <if test="address != null">
+                address = #{address}
+            </if>
+        </set>
+        where id = #{id}
+    </update>
+    <select id="queryLawyerByCode" parameterType="java.lang.String" resultMap="lawyerResult">
+        SELECT * FROM ls_lawyer WHERE code=#{code} AND code IS NOT NULL AND code !=''
+    </select>
+
+    <resultMap id="LawyerExternal" type="com.lecshop.total.lawyer.bean.LawyerExternal">
+        <result column="id" property="id"/>
+        <result column="name" property="name"/>
+        <result column="code" property="code"/>
+        <result column="type" property="type"/>
+        <result column="mobile" property="mobile"/>
+        <result column="lawyers_place" property="lawyersPlace"/>
+        <result column="search_forbid" property="searchForbid"/>
+    </resultMap>
+    <select id="externalInterface" parameterType="java.util.Map" resultMap="LawyerExternal">
+        SELECT id,`name`,mobile,code,lawyers_place,`type`,search_forbid
+        FROM ls_lawyer WHERE del_flag = '0'
+        ORDER BY id DESC
+        limit #{startRowNum},#{pageSize}
+    </select>
+    <select id="externalInterfaceCount" resultType="java.lang.Integer">
+        SELECT count(1)
+        FROM ls_lawyer WHERE del_flag = '0'
+    </select>
+</mapper>

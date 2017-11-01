@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lecshop.total.affairlist.mapper.ModifyDocMapper">
+    <resultMap id="BaseResult" type="com.lecshop.total.affairlist.bean.ModifyDoc">
+        <id column="id" property="id"/>
+        <result column="company_id" property="companyId"/>
+        <result column="user_id" property="userId"/>
+        <result column="lawyer_id" property="lawyerId"/>
+        <result column="name" property="name"/>
+        <result column="status" property="status"/>
+        <result column="score" property="score"/>
+        <result column="doc_url" property="docUrl"/>
+        <result column="desc" property="desc"/>
+        <result column="create_time" property="createTime"/>
+        <result column="lawyer_name" property="lawyer.name"/>
+        <result column="lawyerMobile" property="lawyer.mobile"/>
+        <result column="company_name" property="companyInfo.name"/>
+    </resultMap>
+    <select id="queryModifyDocCount" parameterType="java.util.Map" resultType="java.lang.Integer">
+        SELECT COUNT(1) FROM
+        (
+        SELECT modify_company.*,ls_lawyer.`name` AS lawyer_name FROM
+        (
+        SELECT lmd.*,lci.name AS company_name FROM ls_modify_doc AS lmd
+        LEFT JOIN ls_company_info AS lci ON lmd.company_id=lci.id
+        )
+        AS modify_company LEFT JOIN ls_lawyer ON modify_company.lawyer_id=ls_lawyer.id
+        ) AS info
+        WHERE 1=1
+        <if test="companyName !='' and companyName !=null ">
+            AND company_name=#{companyName}
+        </if>
+        <if test="lawyerName !='' and lawyerName !=null ">
+            AND lawyer_name=#{lawyerName}
+        </if>
+        <if test="companyId !='' and companyId != 0 ">
+            AND company_id=#{companyId}
+        </if>
+        <if test="userId !='' and userId != 0 ">
+            AND user_id=#{userId}
+        </if>
+        <if test="lawyerId !='' and lawyerId != 0 ">
+            AND lawyer_id=#{lawyerId}
+        </if>
+    </select>
+    <select id="queryModifyDoc" parameterType="java.util.Map" resultMap="BaseResult">
+        SELECT * FROM (
+        SELECT modify_company.*,ls_lawyer.`name` AS lawyer_name,ls_lawyer.mobile AS lawyerMobile FROM
+        (
+        SELECT lmd.*,lci.name AS company_name FROM ls_modify_doc AS lmd
+        LEFT JOIN ls_company_info AS lci ON lmd.company_id=lci.id
+        )
+        AS modify_company LEFT JOIN ls_lawyer ON modify_company.lawyer_id=ls_lawyer.id
+        ) AS info
+        WHERE 1=1
+        <if test="companyName !='' and companyName !=null ">
+            AND company_name=#{companyName}
+        </if>
+        <if test="lawyerName !='' and lawyerName !=null ">
+            AND lawyer_name=#{lawyerName}
+        </if>
+        <if test="companyId !='' and companyId != 0 ">
+            AND company_id=#{companyId}
+        </if>
+        <if test="userId !='' and userId != 0 ">
+            AND user_id=#{userId}
+        </if>
+        <if test="lawyerId !='' and lawyerId != 0 ">
+            AND lawyer_id=#{lawyerId}
+        </if>
+        ORDER BY create_time DESC
+        limit #{startRowNum},#{pageSize}
+    </select>
+    <insert id="addModifyDoc" parameterType="com.lecshop.total.affairlist.bean.ModifyDoc" keyProperty="id"
+            useGeneratedKeys="true">
+        INSERT INTO ls_modify_doc (company_id, user_id, lawyer_id, name, status, create_time) VALUES (#{companyId}, #{userId}, #{lawyerId}, #{name}, '0', NOW())
+    </insert>
+    <select id="queryToDoModifyDoc" parameterType="java.util.Map" resultMap="BaseResult">
+        SELECT md.*,l.`name` AS lawyer_name FROM ls_modify_doc AS md JOIN ls_lawyer AS l ON md.lawyer_id=l.id
+        WHERE md.status!='3' AND md.status!='0' AND md.company_id=#{companyId}
+        <if test="userId != 0">
+            AND md.user_id=#{userId}
+        </if>
+    </select>
+
+    <update id="changeModifyDocStatus" parameterType="java.util.Map">
+        UPDATE ls_modify_doc SET status = #{status} WHERE id = #{id}
+    </update>
+    <update id="gradeForModifyDoc" parameterType="java.util.Map">
+        UPDATE ls_modify_doc SET score = #{score} WHERE id = #{id}
+    </update>
+    <select id="queryModifyDocCountByTime" parameterType="java.util.Map" resultType="java.lang.Integer">
+        SELECT COUNT(0) FROM ls_modify_doc WHERE create_time >= #{time} AND company_id = #{companyId}
+    </select>
+
+    <select id="queryModifyDocOrderCount" parameterType="java.util.Map" resultType="java.lang.Integer">
+        SELECT COUNT(1) FROM ls_modify_doc WHERE lawyer_id = #{id}
+        <if test='(startTime != null and startTime != "") and (endTime != null and endTime != "")'>
+            AND create_time BETWEEN #{startTime} AND #{endTime}
+        </if>
+    </select>
+    <select id="queryModifyDocOrderCountOfCompany" parameterType="java.util.Map" resultType="java.lang.Integer">
+        SELECT COUNT(1) FROM ls_modify_doc WHERE company_id = #{id}
+        <if test='(startTime != null and startTime != "") and (endTime != null and endTime != "")'>
+            AND create_time BETWEEN #{startTime} AND #{endTime}
+        </if>
+    </select>
+</mapper>

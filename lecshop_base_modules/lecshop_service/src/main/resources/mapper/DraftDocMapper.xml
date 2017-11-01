@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lecshop.total.affairlist.mapper.DraftDocMapper">
+    <resultMap id="draftDocResult" type="com.lecshop.total.affairlist.bean.DraftDoc">
+        <id column="id" property="id"/>
+        <result column="company_id" property="companyId"/>
+        <result column="user_id" property="userId"/>
+        <result column="lawyer_id" property="lawyerId"/>
+        <result column="name" property="name"/>
+        <result column="status" property="status"/>
+        <result column="create_time" property="createTime"/>
+        <result column="score" property="score"/>
+        <result column="lawyer_name" property="lawyer.name"/>
+        <result column="lawyerMobile" property="lawyer.mobile"/>
+        <result column="company_name" property="companyInfo.name"/>
+    </resultMap>
+    <select id="queryDraftDocCount" parameterType="java.util.Map" resultType="java.lang.Integer">
+        SELECT COUNT(1) FROM
+        (
+        SELECT modify_company.*,ls_lawyer.`name` AS lawyer_name FROM
+        (
+        SELECT ldd.*,lci.name AS company_name FROM ls_draft_doc AS ldd
+        LEFT JOIN ls_company_info AS lci ON ldd.company_id=lci.id
+        )
+        AS modify_company LEFT JOIN ls_lawyer ON modify_company.lawyer_id=ls_lawyer.id
+        ) AS info
+        WHERE 1=1
+        <if test="companyName !='' and companyName !=null ">
+            AND company_name=#{companyName}
+        </if>
+        <if test="lawyerName !='' and lawyerName !=null ">
+            AND lawyer_name=#{lawyerName}
+        </if>
+        <if test="companyId !='' and companyId != 0 ">
+            AND company_id=#{companyId}
+        </if>
+        <if test="userId !='' and userId != 0 ">
+            AND user_id=#{userId}
+        </if>
+        <if test="lawyerId !='' and lawyerId != 0 ">
+            AND lawyer_id=#{lawyerId}
+        </if>
+    </select>
+    <select id="queryDraftDoc" parameterType="java.util.Map" resultMap="draftDocResult">
+        SELECT * FROM (
+        SELECT modify_company.*,ls_lawyer.`name` AS lawyer_name,ls_lawyer.mobile AS lawyerMobile FROM
+        (
+        SELECT ldd.*,lci.name AS company_name FROM ls_draft_doc AS ldd
+        LEFT JOIN ls_company_info AS lci ON ldd.company_id=lci.id
+        )
+        AS modify_company LEFT JOIN ls_lawyer ON modify_company.lawyer_id=ls_lawyer.id
+        ) AS info
+        WHERE 1=1
+        <if test="companyName !='' and companyName !=null ">
+            AND company_name=#{companyName}
+        </if>
+        <if test="lawyerName !='' and lawyerName !=null ">
+            AND lawyer_name=#{lawyerName}
+        </if>
+        <if test="companyId !='' and companyId != 0 ">
+            AND company_id=#{companyId}
+        </if>
+        <if test="userId !='' and userId != 0 ">
+            AND user_id=#{userId}
+        </if>
+        <if test="lawyerId !='' and lawyerId != 0 ">
+            AND lawyer_id=#{lawyerId}
+        </if>
+        ORDER BY create_time DESC
+        limit #{startRowNum},#{pageSize}
+    </select>
+    <insert id="addDraftDoc" parameterType="com.lecshop.total.affairlist.bean.DraftDoc" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO ls_draft_doc SET user_id = #{userId}, company_id = #{companyId}, lawyer_id = #{lawyerId}, `name` = #{name}, create_time = NOW(), status = 0
+    </insert>
+    <select id="queryToDoDraftDoc" parameterType="java.util.Map" resultMap="draftDocResult">
+        SELECT dd.*,l.`name` AS lawyer_name FROM ls_draft_doc AS dd JOIN ls_lawyer AS l ON dd.lawyer_id=l.id
+        WHERE dd.status != '3' AND dd.status != '0' AND dd.company_id=#{companyId}
+        <if test="userId != 0">
+            AND dd.user_id=#{userId}
+        </if>
+    </select>
+
+    <update id="updateDraftDocStatus" parameterType="java.util.Map">
+        UPDATE ls_draft_doc SET status = #{status} WHERE id = #{id}
+    </update>
+    <update id="gradeForDraftDoc" parameterType="java.util.Map">
+        UPDATE ls_draft_doc SET score = #{score} WHERE id = #{id}
+    </update>
+
+    <select id="queryDraftDocOrderCount" parameterType="java.util.Map" resultType="java.lang.Integer">
+        SELECT COUNT(1) FROM ls_draft_doc WHERE lawyer_id = #{id}
+        <if test='(startTime != null and startTime != "") and (endTime != null and endTime != "")'>
+            AND create_time BETWEEN #{startTime} AND #{endTime}
+        </if>
+    </select>
+    <select id="queryDraftDocOrderCountOfCompany" parameterType="java.util.Map" resultType="java.lang.Integer">
+        SELECT COUNT(1) FROM ls_draft_doc WHERE company_id = #{id}
+        <if test='(startTime != null and startTime != "") and (endTime != null and endTime != "")'>
+            AND create_time BETWEEN #{startTime} AND #{endTime}
+        </if>
+    </select>
+</mapper>

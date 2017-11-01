@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lecshop.admin.manager.mapper.ManagerMapper">
+    <resultMap id="manager" type="com.lecshop.admin.manager.bean.Manager">
+        <id column="id" property="id"/>
+        <id column="username" property="username"/>
+        <id column="password" property="password"/>
+        <id column="is_use" property="isUse"/>
+        <id column="create_time" property="createTime"/>
+        <result column="del_flag" property="delFlag"/>
+    </resultMap>
+    <select id="queryManagerByName" parameterType="java.util.Map" resultMap="manager">
+        SELECT * FROM ls_manager WHERE username = #{name} AND del_flag='0'
+    </select>
+    <update id="updateManagerPassWord" parameterType="com.lecshop.admin.manager.bean.Manager">
+        UPDATE ls_manager SET password=#{password} WHERE id=#{id} AND username=#{username}
+    </update>
+    <select id="queryManagers" parameterType="java.util.Map" resultMap="manager">
+        select id,username,is_use,create_time from ls_manager
+        where id!=#{id} AND del_flag='0'
+        <if test="name != null">
+            AND username like CONCAT(CONCAT('%', #{name}),'%')
+        </if>
+        limit #{startRowNum},#{pageSize}
+    </select>
+    <select id="queryManagersCount" parameterType="java.util.Map" resultType="java.lang.Integer">
+        select count(1) from ls_manager where id!=#{id} AND del_flag='0'
+        <if test="name != null">
+            AND username like CONCAT(CONCAT('%', #{name}),'%')
+        </if>
+    </select>
+    <insert id="addManager" parameterType="com.lecshop.admin.manager.bean.Manager" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO ls_manager (username,password,is_use,create_time,del_flag) VALUES (#{username},#{password},#{isUse},now(),'0')
+    </insert>
+    <insert id="addManagerRole" parameterType="java.util.Map">
+        INSERT INTO ls_manager_role(manager_id,role_id) VALUES (#{managerId},#{roleId})
+    </insert>
+    <resultMap id="roleAndManager" type="com.lecshop.admin.role.bean.RoleAndManager">
+        <id column="id" property="managerId"/>
+        <result column="username" property="userName"/>
+        <result column="is_use" property="isUse"/>
+        <result column="role_id" property="roleId"/>
+    </resultMap>
+    <select id="queryRoleAndManagerByManagerId" parameterType="long" resultMap="roleAndManager">
+        SELECT m.id,m.username,m.is_use,mr.role_id
+        FROM ls_manager AS m JOIN ls_manager_role AS mr ON m.id=mr.manager_id
+        WHERE m.id=#{managerId}
+    </select>
+    <update id="updateManager" parameterType="com.lecshop.admin.role.bean.RoleAndManager">
+        UPDATE ls_manager SET username=#{userName},is_use=#{isUse} WHERE id=#{managerId}
+    </update>
+    <update id="updateRoleAndManager" parameterType="com.lecshop.admin.role.bean.RoleAndManager">
+        UPDATE ls_manager_role SET role_id=#{roleId} WHERE manager_id=#{managerId}
+    </update>
+    <delete id="deleteManager" parameterType="java.util.List">
+        UPDATE ls_manager SET del_flag='1' WHERE id IN
+        <foreach collection="array" index="index" item="managerId" open="(" separator="," close=")">
+            #{managerId}
+        </foreach>
+    </delete>
+    <delete id="deleteRoleAndManager" parameterType="java.util.List">
+        DELETE FROM ls_manager_role WHERE manager_id IN
+        <foreach collection="array" index="index" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
+</mapper>

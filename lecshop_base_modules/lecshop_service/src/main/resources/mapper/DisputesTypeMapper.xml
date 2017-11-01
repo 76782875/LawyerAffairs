@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lecshop.total.disputetype.mapper.DisputesTypeMapper">
+
+    <resultMap id="disputesTypeResult" type="com.lecshop.total.disputetype.bean.DisputesType">
+        <result column="id" property="id"/>
+        <result column="name" property="name"/>
+        <result column="sort" property="sort"/>
+        <result column="del_flag" property="delFlag"/>
+        <result column="create_time" property="createTime"/>
+        <result column="parent_id" property="parentId"/>
+        <result column="grade" property="grade"/>
+        <result column="code" property="code"/>
+    </resultMap>
+
+    <select id="queryDisputesTypeList" resultMap="disputesTypeResult">
+        SELECT id,name,sort,del_flag,create_time,parent_id,grade,code FROM ls_disputes_type WHERE del_flag = '0' ORDER BY parent_id,sort
+    </select>
+
+    <select id="queryChildByParentId" parameterType="java.lang.Long" resultMap="disputesTypeResult">
+        SELECT id,name,sort,del_flag,create_time,parent_id,grade,code FROM ls_disputes_type WHERE parent_id = #{parentId} AND del_flag = '0'
+    </select>
+
+    <update id="deleteDisputesType" parameterType="com.lecshop.total.disputetype.bean.DisputesType">
+        UPDATE ls_disputes_type SET del_flag = '1' WHERE id = #{id} OR parent_id = #{id}
+    </update>
+
+    <select id="queryDisputesTypeById" parameterType="java.lang.Long" resultMap="disputesTypeResult">
+        SELECT id,name,sort,del_flag,create_time,parent_id,grade,code FROM ls_disputes_type WHERE id = #{id}
+    </select>
+
+    <update id="updateDisputesType" parameterType="com.lecshop.total.disputetype.bean.DisputesType">
+        UPDATE ls_disputes_type SET name = #{name}, sort = #{sort}, parent_id = #{parentId}, code = #{code} WHERE id = #{id}
+    </update>
+
+    <select id="queryDisputesTypeByName" parameterType="java.lang.String" resultMap="disputesTypeResult">
+        SELECT id,name,sort,del_flag,create_time,parent_id,grade,code FROM ls_disputes_type WHERE name = #{name}
+    </select>
+
+    <insert id="addDisputesType" parameterType="com.lecshop.total.disputetype.bean.DisputesType">
+        INSERT INTO ls_disputes_type (name, sort, del_flag, create_time, parent_id, grade, code) VALUES (#{name}, #{sort}, '0', NOW(), #{parentId}, #{grade}, #{code})
+    </insert>
+
+    <select id="queryFirstGradeDisputesType" resultMap="disputesTypeResult">
+        SELECT id,name,sort,create_time,parent_id,grade,code FROM ls_disputes_type WHERE del_flag = '0' AND grade = 1
+    </select>
+</mapper>

@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lecshop.total.transactionrecords.mapper.TransactionRecordsMapper">
+    <resultMap id="transactionRecordsResult" type="com.lecshop.total.transactionrecords.bean.TransactionRecords">
+        <result column="id" property="id"/>
+        <result column="lawyer_id" property="lawyerId"/>
+        <result column="money" property="money"/>
+        <result column="type" property="type"/>
+        <result column="desc" property="desc"/>
+        <result column="create_time" property="createTime"/>
+        <result column="lawyerName" property="lawyer.name"/>
+    </resultMap>
+    <select id="queryTransactionRecordsList" parameterType="java.util.Map" resultMap="transactionRecordsResult">
+        SELECT t.id,t.lawyer_id,t.money,t.type,t.desc,t.create_time,l.`name` AS lawyerName
+        FROM ls_transaction_record t JOIN ls_lawyer l ON t.lawyer_id = l.id
+        <if test='name != null and !"".equals(name.trim())'>
+            WHERE l.`name` LIKE CONCAT(CONCAT('%',#{name}),'%')
+        </if>
+        ORDER BY t.create_time DESC
+        limit #{startRowNum},#{pageSize}
+    </select>
+    <select id="queryTransactionRecordsCount" parameterType="java.util.Map" resultType="java.lang.Integer">
+        SELECT COUNT(1)
+        FROM ls_transaction_record t JOIN ls_lawyer l ON t.lawyer_id = l.id
+        <if test='name != null and !"".equals(name.trim())'>
+            WHERE l.`name` LIKE CONCAT(CONCAT('%',#{name}),'%')
+        </if>
+    </select>
+
+    <select id="queryLawyerAllIncome" parameterType="java.lang.Long" resultMap="transactionRecordsResult">
+        select * from ls_transaction_record where type = '1' and lawyer_id = #{lawyerId}
+    </select>
+
+    <select id="queryLawyerAllOutcome" parameterType="java.lang.Long" resultMap="transactionRecordsResult">
+    select * from ls_transaction_record where type = '2' and lawyer_id = #{lawyerId}
+    </select>
+
+    <select id="queryLawyerCurrentDayAllIncome" parameterType="java.lang.Long" resultMap="transactionRecordsResult">
+       select * from ls_transaction_record where date(create_time) = curdate() and type = '1' and lawyer_id = #{lawyerId};
+    </select>
+
+    <insert id="addTransactionRecords" parameterType="com.lecshop.total.transactionrecords.bean.TransactionRecords" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO ls_transaction_record (lawyer_id,money,`type`,`desc`,create_time)
+        VALUES (#{lawyerId},#{money},#{type},#{desc},now())
+    </insert>
+
+    <delete id="deleteById" parameterType="java.lang.Long">
+        delete from ls_transaction_record where id = #{id}
+    </delete>
+
+    <select id="queryLawyerTotalIncome" parameterType="java.util.Map" resultType="java.math.BigDecimal">
+        SELECT SUM(money) FROM ls_transaction_record WHERE lawyer_id = #{id} AND `type` = '1'
+        <if test='(startTime != null and startTime != "") and (endTime != null and endTime != "")'>
+            AND create_time BETWEEN #{startTime} AND #{endTime}
+        </if>
+    </select>
+</mapper>
